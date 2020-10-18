@@ -2,6 +2,7 @@
 {% block content %}
 <script src="/static/js/three.min.js"></script>
 <script src="/static/js/OrbitControls.js"></script>
+<script src="/static/js/water-material.js"></script>
 
 {% if ship_results %}
 <script type="text/javascript">
@@ -26,6 +27,8 @@
   window.addEventListener('load', init);
 
   function init() {
+
+    var clock = new THREE.Clock();
 
     const width = 960;
     const height = 540;
@@ -71,6 +74,38 @@
     scene.add(axis);
     axis.position.set(0, 0, 0);
 
+    // Add directional Light
+    const directionalLight = new THREE.DirectionalLight( 0xffff55 , 1);
+    directionalLight.position.set( 0, 0, 1000 );
+    scene.add(directionalLight);
+
+    // Load textures
+    const waterNormals = new THREE.ImageUtils.loadTexture( '/static/textures/waternormals.jpg' );
+    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; 
+
+    // Create the water effect
+    const water = new THREE.Water( renderer, camera, scene, {
+      textureWidth: 256,
+      textureHeight: 256,
+      waterNormals: waterNormals,
+      distortionScale: 20,
+      noiseScale: .8,
+      alpha: 1.0,
+      sunDirection: directionalLight.position.normalize(),
+      sunColor: 0xffffff,
+      waterColor: 0x001e0f,
+      side: THREE.DoubleSide
+    } );
+
+    const waterSurface = new THREE.Mesh(
+      new THREE.PlaneGeometry( 100, 100, 10, 10 ),
+      water.material
+    );
+    waterSurface.add(water);
+    // waterSurface.rotation.x = Math.PI / 2 ;
+
+    scene.add(waterSurface);
+
     var animationStartTime = new Date().getTime();
     animate();
 
@@ -101,8 +136,10 @@
 
       controls.update();
       renderer.render(scene, camera);
-
+      var elapsed = clock.getElapsedTime()
       requestAnimationFrame(animate);
+      water.render();
+      water.material.uniforms.time.value = elapsed;
     }
   }
 </script>
