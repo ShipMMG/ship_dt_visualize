@@ -34,21 +34,28 @@
     const height = 540;
 
     const renderer = new THREE.WebGLRenderer({
-      canvas: document.querySelector('#myCanvas')
+      canvas: document.querySelector('#myCanvas'),
+      alpha: true,
+      antialias:true,
     });
     renderer.setPixelRatio(window.devicePixelRatio);
+    // renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setSize(width, height);
+    // renderer.setFaceCulling(THREE.CullFaceNone);
+    // document.body.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(60, width / height, 1, 500);
+    const camera = new THREE.PerspectiveCamera(60, width / height, 1, 10000);
     camera.position.set({{init_camera_position_x}}, {{init_camera_position_y}}, {{init_camera_position_z}});
     camera.lookAt(new THREE.Vector3({{init_camera_look_at_x}}, {{init_camera_look_at_y}}, {{init_camera_look_at_z}}));
+    
     const grid = new THREE.GridHelper({{grid_helper_size}}, {{grid_helper_step}});
     grid.rotation.x = Math.PI / 2; //for x-y grid
     scene.add(grid);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.minPolarAngle = - Math.PI * 0.495;
 
     const geometry = new THREE.CubeGeometry({{ L }}, {{ B }}, {{ d }});
     
@@ -74,9 +81,13 @@
     scene.add(axis);
     axis.position.set(0, 0, 0);
 
+    // Add environmental light
+    var light2 = new THREE.AmbientLight(0xffffff);
+    scene.add(light2);
+
     // Add directional Light
     const directionalLight = new THREE.DirectionalLight( 0xffff55 , 1);
-    directionalLight.position.set( 0, 0, 1000 );
+    directionalLight.position.set( -600, 300, 600 );
     scene.add(directionalLight);
 
     // Load textures
@@ -85,26 +96,53 @@
 
     // Create the water effect
     const water = new THREE.Water( renderer, camera, scene, {
-      textureWidth: 256,
-      textureHeight: 256,
+      textureWidth: 512,
+      textureHeight: 512,
       waterNormals: waterNormals,
-      distortionScale: 20,
+      distortionScale: 50,
       noiseScale: .8,
       alpha: 1.0,
       sunDirection: directionalLight.position.normalize(),
       sunColor: 0xffffff,
-      waterColor: 0x001e0f,
-      side: THREE.DoubleSide
+      waterColor: 0x334B3F,
     } );
 
     const waterSurface = new THREE.Mesh(
-      new THREE.PlaneGeometry( 100, 100, 10, 10 ),
+      new THREE.PlaneGeometry( 1000, 1000, 10, 10 ),
       water.material
     );
     waterSurface.add(water);
-    // waterSurface.rotation.x = Math.PI / 2 ;
 
     scene.add(waterSurface);
+
+    var aCubeMap = THREE.ImageUtils.loadTextureCube([
+        '/static/textures/skybox/px.jpg',
+        '/static/textures/skybox/nx.jpg',
+        '/static/textures/skybox/py.jpg',
+        '/static/textures/skybox/ny.jpg',
+        '/static/textures/skybox/pz.jpg',
+        '/static/textures/skybox/nz.jpg',
+    ]);
+    aCubeMap.format = THREE.RGBFormat;
+    aCubeMap.mapping = THREE.CubeReflectionMapping;
+
+
+    var aShader = THREE.ShaderLib['cube'];
+    aShader.uniforms['tCube'].value = aCubeMap;
+
+    var aSkyBoxMaterial = new THREE.ShaderMaterial({
+      fragmentShader: aShader.fragmentShader,
+      vertexShader: aShader.vertexShader,
+      uniforms: aShader.uniforms,
+      depthWrite: false,
+      side: THREE.BackSide,
+    });
+
+    var aSkybox = new THREE.Mesh(
+      new THREE.BoxGeometry(1000, 1000, 1000),
+      aSkyBoxMaterial
+    );
+    scene.add(aSkybox);
 
     var animationStartTime = new Date().getTime();
     animate();
@@ -131,9 +169,9 @@
       virtual_ship_mesh_list[{{i-1}}].rotation.z = ship_result_list[{{i}}][count][1];
       {% endif %}
       {% endfor %}
-      
-      
 
+      aSkybox.position.set(camera.position.x, camera.position.y, camera.position.z);
+      renderer.clear();
       controls.update();
       renderer.render(scene, camera);
       var elapsed = clock.getElapsedTime()
@@ -141,7 +179,38 @@
       water.render();
       water.material.uniforms.time.value = elapsed;
     }
-  }
+
+    function loadSkyBox() {
+    //   var aCubeMap = THREE.ImageUtils.loadTextureCube([
+    //     '/static/textures/skybox/px.jpg',
+    //     '/static/textures/skybox/nx.jpg',
+    //     '/static/textures/skybox/py.jpg',
+    //     '/static/textures/skybox/ny.jpg',
+    //     '/static/textures/skybox/pz.jpg',
+    //     '/static/textures/skybox/nz.jpg',
+    //   ]);
+    //   aCubeMap.format = THREE.RGBFormat;
+
+    //   var aShader = THREE.ShaderLib['cube'];
+    //   aShader.uniforms['tCube'].value = aCubeMap;
+
+    //   var aSkyBoxMaterial = new THREE.ShaderMaterial({
+    //     fragmentShader: aShader.fragmentShader,
+    //     vertexShader: aShader.vertexShader,
+    //     uniforms: aShader.uniforms,
+    //     depthWrite: false,
+    //     side: THREE.BackSide
+    //   });
+
+    //   var aSkybox = new THREE.Mesh(
+    //     new THREE.BoxGeometry(1000000, 1000000, 1000000),
+    //     aSkyBoxMaterial
+    //   );
+      
+    //   scene.add(aSkybox);
+    }
+
+	}
 </script>
 {% endif %}
 
