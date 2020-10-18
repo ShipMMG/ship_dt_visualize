@@ -35,14 +35,10 @@
 
     const renderer = new THREE.WebGLRenderer({
       canvas: document.querySelector('#myCanvas'),
-      alpha: true,
       antialias:true,
     });
     renderer.setPixelRatio(window.devicePixelRatio);
-    // renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setSize(width, height);
-    // renderer.setFaceCulling(THREE.CullFaceNone);
-    // document.body.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
 
@@ -80,7 +76,7 @@
     scene.add(real_ship_mesh);
 
     {% if axis_visualizing == 'on' %}
-    const axis = new THREE.AxisHelper(1000);
+    const axis = new THREE.AxisHelper({{ axis_length }});
     scene.add(axis);
     axis.position.set(0, 0, 0);
     {% endif %}
@@ -94,6 +90,7 @@
     directionalLight.position.set( -600, 300, 600 );
     scene.add(directionalLight);
 
+    {% if water_visualizing == 'on' %}
     // Load textures
     const waterNormals = new THREE.ImageUtils.loadTexture( '/static/textures/waternormals.jpg' );
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; 
@@ -107,8 +104,8 @@
       noiseScale: .8,
       alpha: 1.0,
       sunDirection: directionalLight.position.normalize(),
-      sunColor: 0xffffff,
-      waterColor: 0x334B3F,
+      sunColor: {{sun_color}},
+      waterColor: {{water_color}},
     } );
 
     const waterSurface = new THREE.Mesh(
@@ -116,9 +113,11 @@
       water.material
     );
     waterSurface.add(water);
-
     scene.add(waterSurface);
+    {% endif %}
 
+
+    {% if sky_visualizing == 'on' %}
     var aCubeMap = THREE.ImageUtils.loadTextureCube([
         '/static/textures/skybox/px.jpg',
         '/static/textures/skybox/nx.jpg',
@@ -147,6 +146,8 @@
       aSkyBoxMaterial
     );
     scene.add(aSkybox);
+    {% endif %}
+
 
     var animationStartTime = new Date().getTime();
     animate();
@@ -174,46 +175,20 @@
       {% endif %}
       {% endfor %}
 
+      {% if sky_visualizing == 'on' %}
       aSkybox.position.set(camera.position.x, camera.position.y, camera.position.z);
+      {% endif %}
+
       renderer.clear();
       controls.update();
       renderer.render(scene, camera);
       var elapsed = clock.getElapsedTime()
       requestAnimationFrame(animate);
+      {% if water_visualizing == 'on' %}
       water.render();
       water.material.uniforms.time.value = elapsed;
+      {% endif %}
     }
-
-    function loadSkyBox() {
-    //   var aCubeMap = THREE.ImageUtils.loadTextureCube([
-    //     '/static/textures/skybox/px.jpg',
-    //     '/static/textures/skybox/nx.jpg',
-    //     '/static/textures/skybox/py.jpg',
-    //     '/static/textures/skybox/ny.jpg',
-    //     '/static/textures/skybox/pz.jpg',
-    //     '/static/textures/skybox/nz.jpg',
-    //   ]);
-    //   aCubeMap.format = THREE.RGBFormat;
-
-    //   var aShader = THREE.ShaderLib['cube'];
-    //   aShader.uniforms['tCube'].value = aCubeMap;
-
-    //   var aSkyBoxMaterial = new THREE.ShaderMaterial({
-    //     fragmentShader: aShader.fragmentShader,
-    //     vertexShader: aShader.vertexShader,
-    //     uniforms: aShader.uniforms,
-    //     depthWrite: false,
-    //     side: THREE.BackSide
-    //   });
-
-    //   var aSkybox = new THREE.Mesh(
-    //     new THREE.BoxGeometry(1000000, 1000000, 1000000),
-    //     aSkyBoxMaterial
-    //   );
-      
-    //   scene.add(aSkybox);
-    }
-
 	}
 </script>
 {% endif %}

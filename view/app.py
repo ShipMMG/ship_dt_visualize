@@ -42,6 +42,10 @@ def visualize():
     grid_helper_step = request.form.get('grid_helper_step', 100.0)
     axis_visualizing = request.form.get('axis_visualizing', 'off')
     axis_length = request.form.get('axis_length', 1000.0)
+    water_visualizing = request.form.get('water_visualizing', 'off')
+    sun_color = request.form.get('sun_color', '0xffffff')
+    water_color = request.form.get('water_color', '0x334B3F')
+    sky_visualizing = request.form.get('sky_visualizing', 'off')
 
     send_data = request.files['send_data']
     if isinstance(send_data, FileStorage) and send_data.content_type == 'text/csv':
@@ -74,6 +78,8 @@ def visualize():
         init_camera_look_at_z=init_camera_look_at_z,
         grid_visualizing=grid_visualizing, grid_helper_size=grid_helper_size, grid_helper_step=grid_helper_step,
         axis_visualizing=axis_visualizing, axis_length=axis_length,
+        water_visualizing=water_visualizing, sun_color=sun_color, water_color=water_color,
+        sky_visualizing=sky_visualizing,
     )
 
 
