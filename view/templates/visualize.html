@@ -79,9 +79,11 @@
     var real_ship_mesh = new THREE.Mesh(geometry, r_material);
     scene.add(real_ship_mesh);
 
+    {% if axis_visualizing == 'on' %}
     const axis = new THREE.AxisHelper(1000);
     scene.add(axis);
     axis.position.set(0, 0, 0);
+    {% endif %}
 
     // Add environmental light
     var light2 = new THREE.AmbientLight(0xffffff);

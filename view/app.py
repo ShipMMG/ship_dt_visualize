@@ -40,6 +40,8 @@ def visualize():
     grid_visualizing = request.form.get('grid_visualizing', 'off')
     grid_helper_size = request.form.get('grid_helper_size', 100.0)
     grid_helper_step = request.form.get('grid_helper_step', 100.0)
+    axis_visualizing = request.form.get('axis_visualizing', 'off')
+    axis_length = request.form.get('axis_length', 1000.0)
 
     send_data = request.files['send_data']
     if isinstance(send_data, FileStorage) and send_data.content_type == 'text/csv':
@@ -71,6 +73,7 @@ def visualize():
         init_camera_look_at_y=init_camera_look_at_y,
         init_camera_look_at_z=init_camera_look_at_z,
         grid_visualizing=grid_visualizing, grid_helper_size=grid_helper_size, grid_helper_step=grid_helper_step,
+        axis_visualizing=axis_visualizing, axis_length=axis_length,
     )
 
 
