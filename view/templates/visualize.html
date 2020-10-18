@@ -50,9 +50,11 @@
     camera.position.set({{init_camera_position_x}}, {{init_camera_position_y}}, {{init_camera_position_z}});
     camera.lookAt(new THREE.Vector3({{init_camera_look_at_x}}, {{init_camera_look_at_y}}, {{init_camera_look_at_z}}));
     
+    {% if grid_visualizing == 'on' %}
     const grid = new THREE.GridHelper({{grid_helper_size}}, {{grid_helper_step}});
     grid.rotation.x = Math.PI / 2; //for x-y grid
     scene.add(grid);
+    {% endif %}
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.minPolarAngle = - Math.PI * 0.495;

@@ -37,6 +37,7 @@ def visualize():
     init_camera_look_at_x = request.form.get('init_camera_look_at_x', 0.0)
     init_camera_look_at_y = request.form.get('init_camera_look_at_y', 0.0)
     init_camera_look_at_z = request.form.get('init_camera_look_at_z', 0.0)
+    grid_visualizing = request.form.get('grid_visualizing', 'off')
     grid_helper_size = request.form.get('grid_helper_size', 100.0)
     grid_helper_step = request.form.get('grid_helper_step', 100.0)
 
@@ -69,7 +70,7 @@ def visualize():
         init_camera_look_at_x=init_camera_look_at_x,
         init_camera_look_at_y=init_camera_look_at_y,
         init_camera_look_at_z=init_camera_look_at_z,
-        grid_helper_size=grid_helper_size, grid_helper_step=grid_helper_step,
+        grid_visualizing=grid_visualizing, grid_helper_size=grid_helper_size, grid_helper_step=grid_helper_step,
     )
 
 
