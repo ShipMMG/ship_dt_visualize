@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% block content %}
+<script src="/static/js/three.min.js"></script>
+<script src="/static/js/OrbitControls.js"></script>
+
+{% if ship_results %}
+<script type="text/javascript">
+  ship_result_list = []
+  {% for ship in ship_results: %}
+
+  one_ship = [];
+  {% for i in range(time|length): %}
+  one = [];
+  one.push({{ time[i] }});//0.Time
+  one.push({{ ship[i][0]}});//1.psi
+  one.push({{ ship[i][1]}});//2.x
+  one.push({{ ship[i][2]}});//3.y
+  one_ship.push(one);
+  {% endfor %}
+
+  ship_result_list.push(one_ship)
+  {% endfor %}
+
+
+  var count = 0;
+  window.addEventListener('load', init);
+
+  function init() {
+
+    const width = 960;
+    const height = 540;
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: document.querySelector('#myCanvas')
+    });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(width, height);
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(60, width / height, 1, 500);
+    camera.position.set({{init_camera_position_x}}, {{init_camera_position_y}}, {{init_camera_position_z}});
+    camera.lookAt(new THREE.Vector3({{init_camera_look_at_x}}, {{init_camera_look_at_y}}, {{init_camera_look_at_z}}));
+    const grid = new THREE.GridHelper({{grid_helper_size}}, {{grid_helper_step}});
+    grid.rotation.x = Math.PI / 2; //for x-y grid
+    scene.add(grid);
+
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    const geometry = new THREE.CubeGeometry({{ L }}, {{ B }}, {{ d }});
+    
+    virtual_ship_mesh_list = []
+    
+    // virtual ship only
+    {% for i in range(ship_results|length): %}
+    {% if i >0 %}
+    var v_material = new THREE.MeshBasicMaterial({ color: {{ ship_virtual_color }} });
+    v_material.opacity = 0.0
+    var ship_mesh = new THREE.Mesh(geometry, v_material);
+    scene.add(ship_mesh);
+    virtual_ship_mesh_list.push(ship_mesh)
+    {% endif %}
+    {% endfor %}
+
+    // real ship
+    const r_material = new THREE.MeshBasicMaterial({ color: {{ ship_real_color }} });
+    var real_ship_mesh = new THREE.Mesh(geometry, r_material);
+    scene.add(real_ship_mesh);
+
+    const axis = new THREE.AxisHelper(1000);
+    scene.add(axis);
+    axis.position.set(0, 0, 0);
+
+    var animationStartTime = new Date().getTime();
+    animate();
+
+    function animate() {
+
+      var currentTime = new Date().getTime();
+      count = Math.round((currentTime - animationStartTime) / 1000 * {{ animation_speed }});
+
+      if (count >= one_ship.length - 1) {
+        animationStartTime = new Date().getTime();
+        count = 0;
+      }
+      document.getElementById('time').innerHTML = ship_result_list[0][count][0];
+
+      {% for i in range(ship_results|length): %}
+      {% if i ==0 %}
+      real_ship_mesh.position.x = ship_result_list[{{i}}][count][2];
+      real_ship_mesh.position.y = ship_result_list[{{i}}][count][3];
+      real_ship_mesh.rotation.z = ship_result_list[{{i}}][count][1];
+      {% else %}
+      virtual_ship_mesh_list[{{i-1}}].position.x = ship_result_list[{{i}}][count][2];
+      virtual_ship_mesh_list[{{i-1}}].position.y = ship_result_list[{{i}}][count][3];
+      virtual_ship_mesh_list[{{i-1}}].rotation.z = ship_result_list[{{i}}][count][1];
+      {% endif %}
+      {% endfor %}
+      
+      
+
+      controls.update();
+      renderer.render(scene, camera);
+
+      requestAnimationFrame(animate);
+    }
+  }
+</script>
+{% endif %}
+
+<div class="container">
+  <h2>Results</h2>
+  <div class="info">
+    TIME : <span id="time"></span>
+  </div>
+  <canvas id="myCanvas"></canvas>
+
+</div>
+
+
+
+
+
+{% endblock %}

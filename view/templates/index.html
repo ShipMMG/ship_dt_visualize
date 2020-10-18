@@ -1,0 +1,27 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+  <h2>Hello World</h2>
+</div>
+<form action="visualize" method="post" enctype="multipart/form-data">
+    L : <input type="text" class="form-control" id="L" name="L" value=2.2 /><br/>
+    B : <input type="text" class="form-control" id="B" name="B" value=0.3 /><br/>
+    d : <input type="text" class="form-control" id="d" name="d" value=0.1 /><br/>
+    <input type="file" id="send_data" name="send_data"><br/>
+    <br/>
+    Ship color (real) : <input type="text" class="form-control" id="ship_real_color" name="ship_real_color" value=0XFF00FF /><br/>
+    Ship color (virtual) : <input type="text" class="form-control" id="ship_virtual_color" name="ship_virtual_color" value=0XDCF8FF /><br/>
+    Animation speed : <input type="text" class="form-control" id="animation_speed" name="animation_speed" value=10 /><br/>
+    Initial camera position (x) : <input type="text" class="form-control" id="init_camera_position_x" name="init_camera_position_x" value=0 /><br/>
+    Initial camera position (y) : <input type="text" class="form-control" id="init_camera_position_y" name="init_camera_position_y" value=0 /><br/>
+    Initial camera position (z) : <input type="text" class="form-control" id="init_camera_position_z" name="init_camera_position_z" value=15 /><br/>
+    Initial camera look_at (x) : <input type="text" class="form-control" id="init_camera_look_at_x" name="init_camera_look_at_x" value=0 /><br/>
+    Initial camera look_at (y) : <input type="text" class="form-control" id="init_camera_look_at_y" name="init_camera_look_at_y" value=0 /><br/>
+    Initial camera look_at (z) : <input type="text" class="form-control" id="init_camera_look_at_z" name="init_camera_look_at_z" value=0 /><br/>
+    Grid helper (size) : <input type="text" class="form-control" id="grid_helper_size" name="grid_helper_size" value=100 /><br/>
+    Grid helper (step) : <input type="text" class="form-control" id="grid_helper_step" name="grid_helper_step" value=100 /><br/>
+    
+    <input type="submit" value="Visualize">
+</form>
+{% endblock %}
