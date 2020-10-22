@@ -28,8 +28,9 @@ def visualize():
     B = request.form.get('B', 0.3)
     d = request.form.get('d', 0.1)
 
-    ship_real_color = request.form.get('ship_real_color', '0XFF00FF')
-    ship_virtual_color = request.form.get('ship_virtual_color', '0XDCF8FF')
+    ship_type = request.form.get('ship_type', 'ship')
+    ship_box_real_color = request.form.get('ship_box_real_color', '0XFF00FF')
+    ship_box_virtual_color = request.form.get('ship_box_virtual_color', '0XDCF8FF')
     animation_speed = request.form.get('animation_speed', 1.0)
     init_camera_position_x = request.form.get('init_camera_position_x', 0.0)
     init_camera_position_y = request.form.get('init_camera_position_y', 0.0)
@@ -68,7 +69,8 @@ def visualize():
         time=time,
         ship_results=ship_results,
         L=L, B=B, d=d,
-        ship_real_color=ship_real_color, ship_virtual_color=ship_virtual_color,
+        ship_type=ship_type,
+        ship_box_real_color=ship_box_real_color, ship_box_virtual_color=ship_box_virtual_color,
         animation_speed=animation_speed,
         init_camera_position_x=init_camera_position_x,
         init_camera_position_y=init_camera_position_y,

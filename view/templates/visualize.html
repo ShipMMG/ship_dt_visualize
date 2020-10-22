@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-<script src="/static/js/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/99/three.js"></script>
 <script src="/static/js/OrbitControls.js"></script>
 <script src="/static/js/water-material.js"></script>
+<script src="/static/js/OBJLoader.js"></script>
+<script src="/static/js/MTLLoader.js"></script>
 
 {% if ship_results %}
 <script type="text/javascript">
@@ -24,6 +26,15 @@
 
 
   var count = 0;
+  window.virtual_ship_mesh_list = []
+  {% for i in range(ship_results|length): %}
+  {% if i >0 %}
+  window.virtual_ship_mesh_list.push(new THREE.Object3D())
+  {% endif %}
+  {% endfor %}
+
+  window.real_ship_mesh = new THREE.Object3D();
+
   window.addEventListener('load', init);
 
   function init() {
@@ -57,23 +68,63 @@
 
     const geometry = new THREE.CubeGeometry({{ L }}, {{ B }}, {{ d }});
     
-    virtual_ship_mesh_list = []
-    
+    {% if ship_type == 'box' %}
     // virtual ship only
     {% for i in range(ship_results|length): %}
     {% if i >0 %}
-    var v_material = new THREE.MeshBasicMaterial({ color: {{ ship_virtual_color }} });
+    var v_material = new THREE.MeshBasicMaterial({ color: {{ ship_box_virtual_color }} });
     v_material.opacity = 0.0
-    var ship_mesh = new THREE.Mesh(geometry, v_material);
-    scene.add(ship_mesh);
-    virtual_ship_mesh_list.push(ship_mesh)
+    window.virtual_ship_mesh_list[{{i-1}}] = new THREE.Mesh(geometry, v_material);
+    scene.add( window.virtual_ship_mesh_list[{{i-1}}]);
     {% endif %}
     {% endfor %}
 
     // real ship
-    const r_material = new THREE.MeshBasicMaterial({ color: {{ ship_real_color }} });
-    var real_ship_mesh = new THREE.Mesh(geometry, r_material);
-    scene.add(real_ship_mesh);
+    const r_material = new THREE.MeshBasicMaterial({ color: {{ ship_box_real_color }} });
+    window.real_ship_mesh = new THREE.Mesh(geometry, r_material);
+    scene.add(window.real_ship_mesh);
+    {% endif %}
+    
+    {% if ship_type == 'ship' %}
+    // virtual ship only
+    {% for i in range(ship_results|length): %}
+    {% if i >0 %}
+    new THREE.MTLLoader().setPath('/static/3d_model/').load('wakeboard_virtual.mtl',function(materials){
+        materials.preload();
+        
+        new THREE.OBJLoader().setPath('/static/3d_model/')
+                             .setMaterials(materials)
+                             .load('wakeboard_virtual.obj',function (object){
+            objmodel = object.clone();
+            objmodel.scale.set({{ L }}, {{ B }}, {{ d }});
+            objmodel.position.set(0, 0, 0);
+            // ship_mesh = new THREE.Object3D();
+            // ship_mesh.add(objmodel);
+            window.virtual_ship_mesh_list[{{i-1}}].add(objmodel)
+            scene.add(window.virtual_ship_mesh_list[{{i-1}}]);
+            // window.virtual_ship_mesh_list.push(ship_mesh)
+        });
+        console.log(window.virtual_ship_mesh_list);
+    });
+    {% endif %}
+    {% endfor %}
+
+    // real ship
+    new THREE.MTLLoader().setPath('/static/3d_model/').load('wakeboard.mtl',function(materials){
+        materials.preload();
+        new THREE.OBJLoader().setPath('/static/3d_model/')
+                             .setMaterials(materials)
+                             .load('wakeboard.obj',function (object){
+            objmodel = object.clone();
+            objmodel.scale.set({{ L }}, {{ B }}, {{ d }});
+            objmodel.position.set(0, 0, 0);
+            // window.real_ship_mesh = new THREE.Object3D();
+            window.real_ship_mesh.add(objmodel);
+            scene.add(window.real_ship_mesh);
+        });
+        console.log(window.real_ship_mesh);
+    });
+    {% endif %}
 
     {% if axis_visualizing == 'on' %}
     const axis = new THREE.AxisHelper({{ axis_length }});
@@ -148,7 +199,6 @@
     scene.add(aSkybox);
     {% endif %}
 
-
     var animationStartTime = new Date().getTime();
     animate();
 
@@ -165,13 +215,13 @@
 
       {% for i in range(ship_results|length): %}
       {% if i ==0 %}
-      real_ship_mesh.position.x = ship_result_list[{{i}}][count][2];
-      real_ship_mesh.position.y = ship_result_list[{{i}}][count][3];
-      real_ship_mesh.rotation.z = ship_result_list[{{i}}][count][1];
+      window.real_ship_mesh.position.x = ship_result_list[{{i}}][count][2];
+      window.real_ship_mesh.position.y = ship_result_list[{{i}}][count][3];
+      window.real_ship_mesh.rotation.z = ship_result_list[{{i}}][count][1];
       {% else %}
-      virtual_ship_mesh_list[{{i-1}}].position.x = ship_result_list[{{i}}][count][2];
-      virtual_ship_mesh_list[{{i-1}}].position.y = ship_result_list[{{i}}][count][3];
-      virtual_ship_mesh_list[{{i-1}}].rotation.z = ship_result_list[{{i}}][count][1];
+      window.virtual_ship_mesh_list[{{i-1}}].position.x = ship_result_list[{{i}}][count][2];
+      window.virtual_ship_mesh_list[{{i-1}}].position.y = ship_result_list[{{i}}][count][3];
+      window.virtual_ship_mesh_list[{{i-1}}].rotation.z = ship_result_list[{{i}}][count][1];
       {% endif %}
       {% endfor %}
 
