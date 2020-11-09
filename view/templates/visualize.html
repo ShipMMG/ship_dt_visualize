@@ -160,7 +160,7 @@
     } );
 
     const waterSurface = new THREE.Mesh(
-      new THREE.PlaneGeometry( 1000, 1000, 10, 10 ),
+      new THREE.PlaneGeometry( 100000, 100000, 10, 10 ),
       water.material
     );
     waterSurface.add(water);
@@ -193,7 +193,7 @@
     });
 
     var aSkybox = new THREE.Mesh(
-      new THREE.BoxGeometry(1000, 1000, 1000),
+      new THREE.BoxGeometry(100000, 100000, 100000),
       aSkyBoxMaterial
     );
     scene.add(aSkybox);
